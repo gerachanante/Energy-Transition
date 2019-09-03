@@ -66,15 +66,32 @@ print(rf)
 ########## 4.EVALUATING THE MODEL's PERFORMANCE ##########
 # 1.Defining the performance metrics
 from sklearn.metrics import mean_squared_error, r2_score
+"""The ML model can be assessed with multiple metrics, each with their pros and cons.
+1. MAE
+2. MAPE
+3. MSE
+4. RMSE
+5. R2 defined as (1 - u/v), where u is the residual sum of squares ((y_true - ypred) ** 2).sum() and v is the total sum of squares ((y_true - y_true.mean()) ** 2).sum().
+"""
 # evaluation for the training set
 def evaluate_train(rf, Xtrain, ytrain):
+    error = abs(ypred_train - ytrain)
+    mask = ytrain != 0
+    mape = np.fabs(ytrain - error)/ytrain[mask].mean() 
+    accuracy = np.mean(100 - mape)
     mse = mean_squared_error(ytrain, ypred_train)
     rmse = np.sqrt(mse)
     print("Model Performance on Training")
     print("%0.1f = Mean Squared Error"%(mse))
     print("%0.1f = RMSE"%(rmse))
+    print("Multi-Output Prediction Accuracy (100-MAPE)")
+    print(pd.DataFrame(yhead,accuracy))
 # evaluation for the test set
 def evaluate_test(rf, Xtest, ytest):
+    error = abs(ypred - ytest)
+    mask = ytest != 0
+    mape = np.fabs(ytest - error)/ytest[mask].mean() 
+    accuracy = np.mean(100 - mape)
     mse = mean_squared_error(ytest, ypred)
     rmse = np.sqrt(mse)
     r2 = r2_score(ytest, ypred, multioutput='raw_values')
@@ -83,10 +100,11 @@ def evaluate_test(rf, Xtest, ytest):
     print("%0.1f = RMSE"%(rmse))
     print("Multi-output R2")
     print(pd.DataFrame(yhead,r2))
+    print("Multi-Output Prediction Accuracy (100-MAPE)")
+    print(pd.DataFrame(yhead,accuracy))
     
 # 2.Calling the functions to evaluate the model's performance
 evaluate_train(rf, Xtrain, ytrain)
-#R^2 is defined as (1 - u/v), where u is the residual sum of squares ((y_true - ypred) ** 2).sum() and v is the total sum of squares ((y_true - y_true.mean()) ** 2).sum().
 print("%0.3f = OOB R2 Score"%(rf.oob_score_))
 evaluate_test(rf, Xtest, ytest)
 print("%0.3f = Test Multi-output variance wt. R2"%(rf.score(Xtest, ytest)))
